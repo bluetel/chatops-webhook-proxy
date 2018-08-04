@@ -1,0 +1,53 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8.10
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - yarn-dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Install dependencies
+          command: yarn --dev
+      - run: 
+          name: Run tests
+          command: yarn run test
+      - save_cache:
+          paths:
+            - node_modules
+          key: yarn-dependency-cache-{{ checksum "package.json" }}
+
+  deploy:
+    docker:
+      - image: circleci/node:8.10
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - yarn-dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Install Serverless CLI and dependencies
+          command: |
+            sudo npm install --silent --global serverless
+            yarn --dev
+      - run:
+          name: Deploy application 
+          command: serverless deploy --stage prod
+      - save_cache:
+          paths:
+            - node_modules
+          key: yarn-dependency-cache-{{ checksum "package.json" }}
+
+workflows:
+  version: 2
+  deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master

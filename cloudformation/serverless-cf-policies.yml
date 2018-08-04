@@ -1,0 +1,155 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cloudformation stack to manage permission to deploy a serverless service'
+
+Parameters:
+  ServiceName:
+    Description: Name of the Service you want to deploy
+    Type: String
+
+Resources:
+  ServerlessDeployBot:
+    Type: AWS::IAM::User
+    Properties:
+      ManagedPolicyArns:
+      - !Ref ServelessDeployCFPolicy
+      - !Ref ServelessDeployS3Policy
+      - !Ref ServelessDeployLogsPolicy
+      - !Ref ServelessDeployIAMPolicy
+      - !Ref ServelessDeployLambdaPolicy
+
+  ServerlessDeployBotAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref ServerlessDeployBot
+
+  ServelessDeployCFPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: 'cloudformation:ValidateTemplate'
+            Resource: '*'
+
+          - Effect: Allow
+            Action:
+            - 'cloudformation:Describe*'
+            - 'cloudformation:List*'
+            - 'cloudformation:Get*'
+            - 'cloudformation:PreviewStackUpdate'
+            - 'cloudformation:CreateStack'
+            - 'cloudformation:UpdateStack'
+            Resource:
+            - !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ServiceName}-*'
+
+  ServelessDeployS3Policy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+            - 's3:Get*'
+            - 's3:List*'
+            Resource:
+            - !Sub 'arn:aws:s3:::${ServiceName}-*'
+
+          - Effect: Allow
+            Action:
+            - 's3:*'
+            Resource:
+            - !Sub 'arn:aws:s3:::${ServiceName}-*/*'
+
+  ServelessDeployLogsPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+            - 'logs:DescribeLogGroups'
+            Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group::log-stream:*'
+
+          - Effect: Allow
+            Action:
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:DeleteLogGroup'
+            - 'logs:DeleteLogStream'
+            - 'logs:DescribeLogStreams'
+            - 'logs:FilterLogEvents'
+            Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:log-stream:*'
+
+  ServelessDeployIAMPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+            - 'iam:GetRole'
+            - 'iam:PassRole'
+            - 'iam:CreateRole'
+            - 'iam:DeleteRole'
+            - 'iam:DetachRolePolicy'
+            - 'iam:PutRolePolicy'
+            - 'iam:AttachRolePolicy'
+            - 'iam:DeleteRolePolicy'
+            Resource:
+            - !Sub 'arn:aws:iam::${AWS::AccountId}:role/${ServiceName}-*-lambdaRole'
+
+  ServelessDeployLambdaPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+            - 'apigateway:GET'
+            - 'apigateway:POST'
+            - 'apigateway:PUT'
+            - 'apigateway:DELETE'
+            Resource: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis'
+
+          - Effect: Allow
+            Action:
+            - 'apigateway:GET'
+            - 'apigateway:POST'
+            - 'apigateway:PUT'
+            - 'apigateway:DELETE'
+            Resource: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/*'
+
+          - Effect: Allow
+            Action:
+            - 'lambda:*'
+            Resource:
+            - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ServiceName}-*'
+
+          - Effect: Allow
+            Action:
+            - 'ec2:DescribeSecurityGroups'
+            - 'ec2:DescribeSubnets'
+            - 'ec2:DescribeVpcs'
+            Resource: '*'
+
+          - Effect: Allow
+            Action:
+            - 'events:Put*'
+            - 'events:Remove*'
+            - 'events:Delete*'
+            - 'events:Describe*'
+            Resource:
+            - !Sub 'arn:aws:events::${AWS::AccountId}:rule/${ServiceName}-*'
+
+Outputs:
+  ServerlessDeployBotAccessKey:
+    Value: !Ref ServerlessDeployBotAccessKey
+    Export:
+      Name: !Sub '${AWS::StackName}-ServerlessDeployBotAccessKey'
+

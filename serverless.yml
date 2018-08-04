@@ -1,11 +1,11 @@
-service: chatops-webhook-proxy
+service: ${env:SERVICE_NAME, "chatops-webhook-proxy"}
 
 frameworkVersion: ">=1.1.0 <2.0.0"
 
 provider:
   name: aws
   runtime: nodejs8.10
-  region: ${opt:region, 'eu-west-1'}
+  region: ${opt:region, env:AWS_REGION, 'eu-west-1'}
   stage: ${opt:stage, 'dev'}
   environment:
       SSM_PREFIX: ${env:SSM_PREFIX, "/service/chatops-webhook-proxy/default/"}

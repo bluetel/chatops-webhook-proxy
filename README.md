@@ -1,5 +1,7 @@
 # ChatOps Webhook Proxy
 
+[![CircleCI](https://circleci.com/gh/Bluetel-Solutions/chatops-webhook-proxy/tree/master.svg?style=svg)](https://circleci.com/gh/Bluetel-Solutions/chatops-webhook-proxy/tree/master)
+
 A simple proxy, written as a Lambda picoservice, for forwarding various common webhook formats (e.g. from JIRA Service Desk)
 to any given Slack-compatible incoming webhook endpoint (e.g. Slack, Discord).
 
