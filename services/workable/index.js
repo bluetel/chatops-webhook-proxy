@@ -16,7 +16,7 @@ module.exports.process = body => {
           break
       }
       return {
-        message,
+        text: message,
         parse: "full",
         attachments: [{
           color: "#00CF00",

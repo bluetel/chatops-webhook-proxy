@@ -40,15 +40,19 @@ module.exports.webhook = async (event, context, callback) => {
 
   // Simple auth shim for protecting sensitive Slack orgs.
   if (parameters["auth-type"] !== "none") {
-    const apiKey = event.queryStringParameters
-      ? event.queryStringParameters.apiKey
-      : null;
-    if (apiKey != parameters["auth-api-key"]) {
-      return callback(null, {
-        statusCode: 500,
-        body: "an error occurred whilst fetching configuration"
-      });
-    }
+    switch (parameters["auth-type"]) {
+      case "api-key":
+            const apiKey = event.queryStringParameters
+              ? event.queryStringParameters.apiKey
+              : null;
+            if (apiKey != parameters["auth-api-key"]) {
+              return callback(null, {
+                statusCode: 500,
+                body: "an error occurred whilst fetching configuration"
+              });
+            }
+            break
+      }
   }
 
   // Process the webhook based on config.
