@@ -1,0 +1,12 @@
+{
+  "name": "chatops-webhook-proxy",
+  "version": "1.0.0",
+  "description": "A JIRA to Slack webhook adapter.",
+  "private": true,
+  "author": "Alex Wilson <a@ax.gy>",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/client": "^3.14.2",
+    "denodeify": "^1.2.1"
+  }
+}
