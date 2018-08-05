@@ -5,16 +5,28 @@ const getParametersByPath = require("./lib/parameter-store")
 const services = require("./services");
 
 module.exports.webhook = async (event, context, callback) => {
-  if (!event.body || !event.body.length > 0) {
-    return callback(null, { statusCode: 400, body: "invalid webhook body" });
-  }
 
+  // Verify that this service is supported.
   const serviceName = event.pathParameters.serviceName;
   if (!services[serviceName]) {
     return callback(null, {
       statusCode: 405,
       body: "unsupported webhook provider"
     });
+  }
+
+  // Allow webhook service verification logic.
+  try {
+    if (services[serviceName].verify) {
+      await services[serviceName].verify(event, context, callback)
+    }
+  } catch (err) {
+    console.error(err)
+    return callback(null, { statusCode: 400, body: "invalid verification" });
+  }
+
+  if (!event.body || !event.body.length > 0) {
+    return callback(null, { statusCode: 400, body: "invalid webhook body" });
   }
 
   // Default parameters
@@ -57,6 +69,7 @@ module.exports.webhook = async (event, context, callback) => {
 
   // Process the webhook based on config.
   try {
+
     // Allow config override based on query parameter so one instance can serve multiple destinations.
     const prefix = event.queryStringParameters
       ? event.queryStringParameters.prefix
@@ -66,6 +79,9 @@ module.exports.webhook = async (event, context, callback) => {
       parameters["webhook-endpoints"];
 
     const body = JSON.parse(event.body);
+    if (services[serviceName].preProcess) {
+      await services[serviceName].preProcess(body, parameters)
+    }
     await sendToSlacks(
       getEndpoints(prefix),
       services[serviceName].process(body)

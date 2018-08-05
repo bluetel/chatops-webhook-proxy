@@ -38,7 +38,7 @@ functions:
     events:
       - http:
           path: webhook/{serviceName}
-          method: post
+          method: any
           request:
             parameters:
               paths:
