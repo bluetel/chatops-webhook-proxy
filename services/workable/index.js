@@ -1,3 +1,5 @@
+const slackifyMarkdown = require('slackify-markdown');
+
 const candidateMessage = body => {
   let message = ""
   switch (body.event_type) {
@@ -34,7 +36,7 @@ module.exports.process = body => {
             value: body.data.stage
           }, {
             title: "Summary",
-            value: body.data.summary
+            value: slackifyMarkdown(body.data.summary)
           }]
         }],
         username: "Workable",

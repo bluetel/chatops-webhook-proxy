@@ -1,4 +1,5 @@
-const fetch = require('node-fetch')
+const fetch = require('node-fetch');
+const slackifyMarkdown = require('slackify-markdown');
 
 const firstChangeFromBody = body => {
   const entry = body.entry[0];
@@ -20,17 +21,19 @@ module.exports.process = body => {
   const name = getName(change)
   const picture = getPicture(change)
 
+  const message = slackifyMarkdown(change.value.message)
+
   return {
     parse: "full",
     attachments: [{
       color: "#394959",
-      fallback: change.value.message,
+      fallback: message,
       author_name: getName(change),
       author_icon: getPicture(change),
       title: `${name ? `${name} posted a new message`:'New post'}`,
       title_link: change.value['permalink_url'],
       fields: [{
-        value: change.value.message,
+        value: message,
         short: false
      }]
     }],

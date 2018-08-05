@@ -1,5 +1,6 @@
 const Issue = require('./entity/issue').Issue
 const User = require('./entity/user').User
+const slackifyMarkdown = require('slackify-markdown');
 
 module.exports.process = (body) => {
   if (body.issue === undefined) {
@@ -23,7 +24,7 @@ module.exports.process = (body) => {
         value: issue.title
       }, {
         title: "Description",
-        value: issue.description
+        value: slackifyMarkdown(issue.description)
       }]
     }],
     username: "JIRA",
