@@ -30,9 +30,8 @@ This project supercedes [jira-slack-webhook](https://github.com/Bluetel-Solution
 ## Installation
 
 1. git clone https://github.com/bluetel-solutions/chatops-webhook-proxy.git && cd chatops-webhook-proxy
-2. cp .config.yml.dist .config.yml
-3. yarn install
-4. `serverless deploy --aws-profile <aws-profile-here> --stage prod`
+2. yarn install
+3. `serverless deploy --aws-profile <aws-profile-here> --stage prod`
 
 
 ## Configuration
